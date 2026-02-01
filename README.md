@@ -11,10 +11,12 @@ A small RAG prototype with document Q&A and extraction workflows, configurable c
 
 ## Setup
 
+**Python**: Use **3.11 or 3.12** for a quick, reliable install. Python 3.14 can cause very long `pip install` times (dependency backtracking); if install hangs, use 3.11/3.12 instead.
+
 1. **Clone / open** this repo and create a virtualenv (recommended):
 
    ```bash
-   python -m venv .venv
+   python3.12 -m venv .venv   # or python3.11
    source .venv/bin/activate   # or .venv\Scripts\activate on Windows
    ```
 
