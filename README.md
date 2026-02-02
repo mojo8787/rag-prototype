@@ -40,6 +40,8 @@ A small RAG prototype with document Q&A and extraction workflows, configurable c
 
 ```bash
 streamlit run app.py
+# or
+streamlit run streamlit_app.py
 ```
 
 Then:

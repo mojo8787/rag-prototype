@@ -76,6 +76,7 @@ def render_ingest():
 
             display_names = [f.name for f in uploaded]
             vector_store = ingest_documents(paths, progress_callback=on_progress, file_display_names=display_names)
+            st.session_state["vector_store"] = vector_store
             for p in paths:
                 try:
                     Path(p).unlink(missing_ok=True)
