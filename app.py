@@ -10,6 +10,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Streamlit Cloud: inject secrets into env so LangChain/OpenAI pick them up
+try:
+    if not os.getenv("OPENAI_API_KEY") and "OPENAI_API_KEY" in st.secrets:
+        os.environ["OPENAI_API_KEY"] = str(st.secrets["OPENAI_API_KEY"])
+except Exception:
+    pass
+
 from src.extraction import DefaultExtractionSchema, run_extraction
 from src.ingest import ingest_documents
 from src.qa import run_qa
@@ -32,9 +39,10 @@ def get_llm():
 
 
 def main():
-    api_key_set = bool(os.getenv("OPENAI_API_KEY", "").strip())
+    api_key = os.getenv("OPENAI_API_KEY", "") or getattr(st.secrets, "OPENAI_API_KEY", "") or ""
+    api_key_set = bool(str(api_key).strip())
     st.sidebar.caption(
-        "OpenAI API key: **set**" if api_key_set else "OpenAI API key: **not set** (add OPENAI_API_KEY to .env)"
+        "OpenAI API key: **set**" if api_key_set else "OpenAI API key: **not set** (add to .env or Streamlit secrets)"
     )
     page = st.sidebar.radio(
         "Page",

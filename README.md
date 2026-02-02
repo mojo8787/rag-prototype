@@ -44,6 +44,19 @@ streamlit run app.py
 streamlit run streamlit_app.py
 ```
 
+## Deploy to Streamlit Community Cloud
+
+1. Go to [share.streamlit.io](https://share.streamlit.io), sign in with GitHub.
+2. Click **Create app** and fill in:
+   - **Repository**: `mojo8787/rag-prototype` (or your fork)
+   - **Branch**: `main`
+   - **Main file path**: `streamlit_app.py`
+3. Open **Advanced settings** and add your secrets (paste as TOML):
+   ```toml
+   OPENAI_API_KEY = "sk-your-key-here"
+   ```
+4. Click **Deploy**.
+
 Then:
 
 1. **Ingest**: Upload one or more `.txt` or `.pdf` files and click **Ingest**.
