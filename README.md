@@ -2,6 +2,10 @@
 
 A small RAG prototype with document Q&A and extraction workflows, configurable chunking, evaluation checklists, and "needs human review" decision gates.
 
+**Demo developed by:** Almotasem Bellah Younis  
+**Contact:** [motasem.youniss@gmail.com](mailto:motasem.youniss@gmail.com)  
+**Location:** Brno, CZ
+
 ## What’s included
 
 - **Document Q&A**: Ask questions over ingested documents; answers are grounded in retrieved chunks with optional confidence and source citations. A gate flags results that need human review (e.g. low confidence, no context).
