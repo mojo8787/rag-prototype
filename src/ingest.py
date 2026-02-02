@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, List
+from typing import Any, Callable, List
 
 from langchain_core.documents import Document
 from langchain_community.vectorstores import Chroma
@@ -44,25 +44,37 @@ def ingest_documents(
     embedding_model: str = "text-embedding-3-small",
     persist_directory: str | None = None,
     collection_name: str = "rag_prototype",
+    progress_callback: Callable[[str, float], None] | None = None,
+    file_display_names: List[str] | None = None,
 ) -> Chroma:
     """
     Load documents from paths, chunk them, embed, and store in Chroma.
 
+    progress_callback(message, progress) is called with progress in 0.0–1.0.
+    file_display_names: optional names to show in progress (e.g. original upload names).
     Returns the Chroma vector store (in-memory if persist_directory is None).
     """
+    def report(msg: str, p: float) -> None:
+        if progress_callback:
+            progress_callback(msg, p)
+
     size = chunk_size if chunk_size is not None else config.CHUNK_SIZE
     overlap = chunk_overlap if chunk_overlap is not None else config.CHUNK_OVERLAP
+    display_names = file_display_names if file_display_names and len(file_display_names) == len(paths) else None
 
     all_chunks: List[Document] = []
-    for path in paths:
+    n_paths = len(paths)
+    for path_idx, path in enumerate(paths):
+        base_name = (display_names[path_idx] if display_names else None) or Path(path).name
+        report(f"Loading {base_name}…", (path_idx + 0.0) / max(n_paths, 1))
         text = load_document(path)
+        report(f"Chunking {base_name}…", (path_idx + 0.5) / max(n_paths, 1))
         chunks = chunk_document(
             text,
             strategy=chunk_strategy,
             chunk_size=size,
             chunk_overlap=overlap,
         )
-        base_name = Path(path).name
         for i, c in enumerate(chunks):
             all_chunks.append(
                 Document(
@@ -74,6 +86,7 @@ def ingest_documents(
     if not all_chunks:
         raise ValueError("No chunks produced from the given documents.")
 
+    report("Embedding and storing in vector DB…", 0.85)
     embeddings = OpenAIEmbeddings(model=embedding_model)
     chroma = Chroma.from_documents(
         documents=all_chunks,
@@ -83,4 +96,5 @@ def ingest_documents(
     )
     if persist_directory:
         chroma.persist()
+    report("Done.", 1.0)
     return chroma

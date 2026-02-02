@@ -1,10 +1,14 @@
 """Streamlit UI for RAG prototype: ingest, Q&A, extraction."""
 from __future__ import annotations
 
+import os
 import tempfile
 from pathlib import Path
 
 import streamlit as st
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from src.extraction import DefaultExtractionSchema, run_extraction
 from src.ingest import ingest_documents
@@ -28,6 +32,10 @@ def get_llm():
 
 
 def main():
+    api_key_set = bool(os.getenv("OPENAI_API_KEY", "").strip())
+    st.sidebar.caption(
+        "OpenAI API key: **set**" if api_key_set else "OpenAI API key: **not set** (add OPENAI_API_KEY to .env)"
+    )
     page = st.sidebar.radio(
         "Page",
         ["Ingest", "Q&A", "Extraction"],
@@ -52,24 +60,34 @@ def render_ingest():
         return
 
     if st.button("Ingest"):
-        with st.spinner("Chunking and embedding..."):
-            try:
-                paths = []
-                for f in uploaded:
-                    suffix = Path(f.name).suffix.lower()
-                    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-                        tmp.write(f.read())
-                        paths.append(tmp.name)
-                vector_store = ingest_documents(paths)
-                for p in paths:
-                    try:
-                        Path(p).unlink(missing_ok=True)
-                    except Exception:
-                        pass
-                st.session_state["vector_store"] = vector_store
-                st.success(f"Ingested {len(uploaded)} file(s). You can now use Q&A and Extraction.")
-            except Exception as e:
-                st.error(str(e))
+        progress_bar = st.progress(0.0, text="Preparing…")
+        status = st.empty()
+        try:
+            paths = []
+            for f in uploaded:
+                suffix = Path(f.name).suffix.lower()
+                with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+                    tmp.write(f.read())
+                    paths.append(tmp.name)
+
+            def on_progress(msg: str, p: float) -> None:
+                progress_bar.progress(min(1.0, max(0.0, p)), text=msg)
+                status.caption(msg)
+
+            display_names = [f.name for f in uploaded]
+            vector_store = ingest_documents(paths, progress_callback=on_progress, file_display_names=display_names)
+            for p in paths:
+                try:
+                    Path(p).unlink(missing_ok=True)
+                except Exception:
+                    pass
+            progress_bar.progress(1.0, text="Done.")
+            status.empty()
+            st.success(f"Ingested {len(uploaded)} file(s). You can now use Q&A and Extraction.")
+        except Exception as e:
+            progress_bar.empty()
+            status.empty()
+            st.error(str(e))
 
 
 def render_qa():
