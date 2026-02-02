@@ -1,0 +1,25 @@
+SERVICE AGREEMENT
+
+Agreement Date: January 15, 2025
+Effective Date: February 1, 2025
+
+Parties:
+- Client: Acme Corporation, 123 Main Street, New York, NY
+- Provider: Tech Solutions Inc., 456 Oak Avenue, San Francisco, CA
+
+Summary:
+This agreement governs the provision of software development services. Tech Solutions Inc. will deliver a custom CRM system for Acme Corporation.
+
+Financial Terms:
+- Total contract value: $125,000 USD
+- Payment schedule: 50% ($62,500) upon signing, 50% ($62,500) upon delivery
+- Milestone 1 (March 15): $31,250
+- Milestone 2 (April 30): $31,250
+
+Key Dates:
+- Project kickoff: February 1, 2025
+- Phase 1 delivery: March 15, 2025
+- Phase 2 delivery: April 30, 2025
+- Final delivery: May 31, 2025
+
+Both parties agree to the terms above.
