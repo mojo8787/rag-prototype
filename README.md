@@ -28,6 +28,9 @@ Contract and document review is manual and error-prone. This prototype demonstra
 - Supports Q&A with source citations and confidence scores.
 - Multi-agent flow adds a structured summary for review.
 
+See [docs/DEMO_RESULTS.md](docs/DEMO_RESULTS.md) for sample outputs and performance metrics.  
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for architecture diagrams.
+
 **Demo developed by:** Almotasem Bellah Younis  
 **Contact:** [motasem.youniss@gmail.com](mailto:motasem.youniss@gmail.com)  
 **Location:** Brno, CZ
@@ -102,18 +105,20 @@ docker compose up --build
 | `/qa` | POST | Ask a question. Body: `{"question": "..."}`. |
 | `/health` | GET | Health check. |
 
-**Example:**
-
+**Quick test (run from project root):**
 ```bash
-# Ingest
+./examples/test_api.sh                              # local
+./examples/test_api.sh https://your-app.azurewebsites.net  # Azure
+```
+
+**Manual curl:**
+```bash
 curl -X POST http://localhost:8000/ingest -F "files=@data/sample_contract.txt"
-
-# Extract
 curl -X POST http://localhost:8000/extract -H "Content-Type: application/json" -d '{}'
-
-# Q&A
 curl -X POST http://localhost:8000/qa -H "Content-Type: application/json" -d '{"question": "What is the contract value?"}'
 ```
+
+See [examples/README.md](examples/README.md) for full test options.
 
 ## Deploy to Streamlit Community Cloud
 
@@ -152,7 +157,10 @@ Then:
 | [src/mlflow_logging.py](src/mlflow_logging.py) | MLFlow experiment tracking |
 | [docs/CHUNKING.md](docs/CHUNKING.md) | Chunking options and config |
 | [docs/EVALUATION_CHECKLIST.md](docs/EVALUATION_CHECKLIST.md) | Evaluation checklist for the prototype |
-| [data/](data/) | Optional folder for sample documents |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Architecture diagrams |
+| [docs/DEMO_RESULTS.md](docs/DEMO_RESULTS.md) | Sample outputs, performance metrics |
+| [examples/](examples/) | Test scripts (curl, Python) |
+| [data/](data/) | Sample documents |
 
 ## Workflows and gates
 
