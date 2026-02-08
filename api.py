@@ -99,6 +99,12 @@ async def ingest(files: list[UploadFile] = File(...)):
         collection_id = await asyncio.to_thread(_do_ingest)
         return IngestResponse(status="ok", collection_id=collection_id)
 
+    except Exception as e:
+        detail = str(e)
+        if "OPENAI_API_KEY" in detail.upper() or "api_key" in detail.lower():
+            detail = "OPENAI_API_KEY not set or invalid. Add it in Azure App Settings."
+        raise HTTPException(status_code=500, detail=detail)
+
     finally:
         for p in paths:
             try:
