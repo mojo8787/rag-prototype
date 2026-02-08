@@ -11,7 +11,6 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from src import config
-from src.agents import run_extraction_agents
 from src.extraction import DefaultExtractionSchema, run_extraction
 from src.ingest import ingest_documents
 from src.llm_factory import get_llm
@@ -115,6 +114,7 @@ async def extract_agents(req: ExtractRequest | None = None):
     llm = get_llm()
 
     def _do_extract():
+        from src.agents import run_extraction_agents
         return run_extraction_agents(vs, DefaultExtractionSchema, llm)
 
     result = await asyncio.to_thread(_do_extract)
