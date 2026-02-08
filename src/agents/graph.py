@@ -6,7 +6,7 @@ from typing import Any, List, Type
 from langchain_core.documents import Document
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_community.vectorstores import Chroma
+from langchain_core.vectorstores import VectorStore
 from pydantic import BaseModel
 from typing_extensions import TypedDict
 
@@ -46,7 +46,7 @@ Write a short summary for a human reviewer."""
 
 
 def _build_extraction_node(
-    vector_store: Chroma,
+    vector_store: VectorStore,
     llm: BaseChatModel,
     schema: Type[BaseModel],
 ):
@@ -127,7 +127,7 @@ def _build_summary_node(llm: BaseChatModel):
 
 
 def run_extraction_agents(
-    vector_store: Chroma,
+    vector_store: VectorStore,
     schema: Type[BaseModel],
     llm: BaseChatModel,
     query: str | None = None,

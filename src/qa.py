@@ -7,7 +7,7 @@ from typing import Any, List
 from langchain_core.documents import Document
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_community.vectorstores import Chroma
+from langchain_core.vectorstores import VectorStore
 
 from . import config
 from .gates import qa_needs_review
@@ -50,7 +50,7 @@ def _parse_confidence(content: str) -> tuple[str, float | None]:
 
 def run_qa(
     question: str,
-    vector_store: Chroma,
+    vector_store: VectorStore,
     llm: BaseChatModel,
     top_k: int | None = None,
     threshold_low_confidence: float | None = None,

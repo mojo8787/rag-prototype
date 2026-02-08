@@ -8,7 +8,7 @@ Contract and document review is manual and error-prone. This prototype demonstra
 
 ## Approach
 
-- **RAG pipeline**: Ingest documents, chunk, embed, store in Chroma. Retrieve top-k chunks for each query.
+- **RAG pipeline**: Ingest documents, chunk, embed, store in FAISS. Retrieve top-k chunks for each query.
 - **Extraction**: LLM extracts structured fields (dates, parties, amounts, terms, summary). Pydantic schema validation.
 - **Human-review gates**: Q&A and extraction workflows flag results that need human review (low confidence, uncertain fields, validation errors).
 - **Multi-agent workflow** (LangGraph): Extraction agent, Validation agent, Summary agent for richer extraction flows.
@@ -18,7 +18,7 @@ Contract and document review is manual and error-prone. This prototype demonstra
 
 - **Python**, **FastAPI** (async API), **Streamlit** (UI)
 - **LangChain**, **LangGraph** (multi-agent)
-- **Chroma** (vector store), **OpenAI** or **Azure OpenAI**
+- **FAISS** (vector store, in-memory; Azure-compatible), **OpenAI** or **Azure OpenAI**
 - **MLFlow** (experiment tracking), **Docker**
 
 ## Results
@@ -147,7 +147,7 @@ Then:
 | [api.py](api.py) | FastAPI (ingest, extract, extract-agents, qa) |
 | [src/config.py](src/config.py) | Chunk size, top-k, gate thresholds |
 | [src/chunking.py](src/chunking.py) | Chunking strategies |
-| [src/ingest.py](src/ingest.py) | Load, chunk, embed, store (Chroma) |
+| [src/ingest.py](src/ingest.py) | Load, chunk, embed, store (FAISS) |
 | [src/retrieval.py](src/retrieval.py) | Top-k retrieval from vector store |
 | [src/qa.py](src/qa.py) | Q&A workflow + gate |
 | [src/extraction.py](src/extraction.py) | Extraction workflow + gate |

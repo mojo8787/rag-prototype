@@ -8,7 +8,7 @@ from typing import Any, List, Type
 from langchain_core.documents import Document
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_community.vectorstores import Chroma
+from langchain_core.vectorstores import VectorStore
 from pydantic import BaseModel, Field, ValidationError
 
 from . import config
@@ -100,7 +100,7 @@ def _validate_record(record: dict[str, Any], schema: Type[BaseModel]) -> List[st
 
 
 def run_extraction(
-    vector_store: Chroma,
+    vector_store: VectorStore,
     schema: Type[BaseModel],
     llm: BaseChatModel,
     query: str | None = None,

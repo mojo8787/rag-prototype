@@ -2,12 +2,15 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Callable, List
+from typing import TYPE_CHECKING, Callable, List
 
 from langchain_core.documents import Document
-from langchain_community.vectorstores import Chroma
+from langchain_community.vectorstores import FAISS
 
 from . import config
+
+if TYPE_CHECKING:
+    from langchain_core.vectorstores import VectorStore
 from .llm_factory import get_embeddings
 from .chunking import chunk_document
 
@@ -46,13 +49,13 @@ def ingest_documents(
     collection_name: str = "rag_prototype",
     progress_callback: Callable[[str, float], None] | None = None,
     file_display_names: List[str] | None = None,
-) -> Chroma:
+) -> "VectorStore":
     """
-    Load documents from paths, chunk them, embed, and store in Chroma.
+    Load documents from paths, chunk them, embed, and store in FAISS.
 
     progress_callback(message, progress) is called with progress in 0.0–1.0.
     file_display_names: optional names to show in progress (e.g. original upload names).
-    Returns the Chroma vector store (in-memory if persist_directory is None).
+    Returns the FAISS vector store (in-memory; no sqlite, works on Azure App Service).
     """
     def report(msg: str, p: float) -> None:
         if progress_callback:
@@ -88,13 +91,9 @@ def ingest_documents(
 
     report("Embedding and storing in vector DB…", 0.85)
     embeddings = get_embeddings(model=embedding_model)
-    chroma = Chroma.from_documents(
+    vector_store = FAISS.from_documents(
         documents=all_chunks,
         embedding=embeddings,
-        collection_name=collection_name,
-        persist_directory=persist_directory,
     )
-    if persist_directory:
-        chroma.persist()
     report("Done.", 1.0)
-    return chroma
+    return vector_store

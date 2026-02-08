@@ -8,19 +8,19 @@ flowchart LR
         PDF[PDF/TXT] --> Load[Load]
         Load --> Chunk[Chunk]
         Chunk --> Embed[Embed]
-        Embed --> Chroma[Chroma DB]
+        Embed --> FAISS[(FAISS)]
     end
 
     subgraph Query [Query Flow]
         Q[Question] --> Retrieve[Retrieve top-k]
-        Retrieve --> Chroma
+        Retrieve --> FAISS
         Retrieve --> LLM[LLM]
         LLM --> Answer[Answer + Sources]
         Answer --> Gate[Human Review Gate]
     end
 
     subgraph Extract [Extraction Flow]
-        Retrieve2[Retrieve] --> Chroma
+        Retrieve2[Retrieve] --> FAISS
         Retrieve2 --> ExtractLLM[Extraction LLM]
         ExtractLLM --> Validate[Validate Schema]
         Validate --> ReviewGate[Review Gate]
@@ -63,10 +63,10 @@ flowchart TB
     FastAPI --> Extract
     FastAPI --> Agents
 
-    Ingest --> Chroma[(Chroma)]
-    QA --> Chroma
-    Extract --> Chroma
-    Agents --> Chroma
+    Ingest --> FAISS[(FAISS)]
+    QA --> FAISS
+    Extract --> FAISS
+    Agents --> FAISS
 
     Ingest --> LLM[OpenAI / Azure OpenAI]
     QA --> LLM
@@ -81,6 +81,6 @@ flowchart TB
 | UI | Streamlit |
 | API | FastAPI (async) |
 | Orchestration | LangChain, LangGraph |
-| Vector DB | Chroma |
+| Vector DB | FAISS (in-memory) |
 | LLM | OpenAI / Azure OpenAI |
 | Tracking | MLFlow |
