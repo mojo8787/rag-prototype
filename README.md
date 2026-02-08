@@ -2,6 +2,8 @@
 
 A small RAG prototype for contract/document extraction: upload PDFs, extract key fields (dates, parties, terms, amounts), run Q&A, and flag uncertain results for human review.
 
+**Live demo:** [Try the app](https://rag-prototype-ezwo58dutziwjacwqxyhqn.streamlit.app/) — upload `.txt`/`.pdf`, ingest, Q&A, and extraction (add `OPENAI_API_KEY` in Streamlit secrets).
+
 ## Problem
 
 Contract and document review is manual and error-prone. This prototype demonstrates automated extraction and Q&A over contract documents, with human-review gates for uncertain or low-confidence results.
@@ -29,7 +31,8 @@ Contract and document review is manual and error-prone. This prototype demonstra
 - Multi-agent flow adds a structured summary for review.
 
 See [docs/DEMO_RESULTS.md](docs/DEMO_RESULTS.md) for sample outputs and performance metrics.  
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for architecture diagrams.
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for architecture diagrams.  
+See [docs/USER_GUIDE.md](docs/USER_GUIDE.md) for setup and usage (API key, Streamlit, API).
 
 **Demo developed by:** Almotasem Bellah Younis  
 **Contact:** [motasem.youniss@gmail.com](mailto:motasem.youniss@gmail.com)  
@@ -41,6 +44,37 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for architecture diagrams.
 - **Document extraction**: Extract structured fields (e.g. dates, parties, amounts, terms) from documents. A gate flags results with uncertain fields or validation errors.
 - **Chunking**: Fixed-size-with-overlap and by-paragraph strategies; see [docs/CHUNKING.md](docs/CHUNKING.md).
 - **Evaluation checklist**: Criteria for judging retrieval, Q&A, extraction, and gates; see [docs/EVALUATION_CHECKLIST.md](docs/EVALUATION_CHECKLIST.md).
+
+## For reviewers: test the API
+
+To verify the API works (ingest, extract, Q&A) without Streamlit:
+
+1. **Clone** and add your OpenAI key:
+   ```bash
+   git clone https://github.com/mojo8787/rag-prototype.git
+   cd rag-prototype
+   echo "OPENAI_API_KEY=sk-your-key" > .env
+   ```
+
+2. **Run the API** (Docker — no Python setup):
+   ```bash
+   docker compose up --build api
+   ```
+
+3. **In another terminal**, run the test script:
+   ```bash
+   ./examples/test_api.sh http://localhost:8000
+   ```
+
+   Expected: health ✓, ingest ✓, extract ✓, Q&A ✓. Or run manually:
+   ```bash
+   curl http://localhost:8000/health
+   curl -X POST http://localhost:8000/ingest -F "files=@data/sample_contract.txt"
+   curl -X POST http://localhost:8000/extract -H "Content-Type: application/json" -d '{}'
+   curl -X POST http://localhost:8000/qa -H "Content-Type: application/json" -d '{"question": "What is the total contract value?"}'
+   ```
+
+**Without Docker:** `pip install -r requirements.txt`, `uvicorn api:app --port 8000`, then run the same curl commands.
 
 ## Setup
 
@@ -105,22 +139,60 @@ docker compose up --build
 | `/qa` | POST | Ask a question. Body: `{"question": "..."}`. |
 | `/health` | GET | Health check. |
 
-**Quick test (run from project root):**
+### Testing (step-by-step)
+
+Run from project root. Use `http://localhost:8000` for local or `https://rag-prototype-7be4dfe5.azurewebsites.net` for Azure.
+
+**1. Health check**
+```bash
+curl https://rag-prototype-7be4dfe5.azurewebsites.net/health
+```
+Expected: `{"status":"ok","documents_loaded":false}`
+
+**2. Ingest** (required before extract/qa)
+```bash
+cd ~/rag-prototype
+curl -X POST https://rag-prototype-7be4dfe5.azurewebsites.net/ingest -F "files=@data/sample_contract.txt"
+```
+Expected: `{"status":"ok","collection_id":"<uuid>"}`  
+If 500: server error — check deploy completed, OPENAI_API_KEY set in Azure.
+
+**3. Extract**
+```bash
+curl -X POST https://rag-prototype-7be4dfe5.azurewebsites.net/extract -H "Content-Type: application/json" -d '{}'
+```
+Expected: JSON with `record`, `uncertain_fields`, `needs_review`.
+
+**4. Q&A**
+```bash
+curl -X POST https://rag-prototype-7be4dfe5.azurewebsites.net/qa -H "Content-Type: application/json" -d '{"question": "What is the total contract value?"}'
+```
+Expected: JSON with `answer`, `confidence`, `source_chunks`.
+
+**Script (all steps):**
 ```bash
 ./examples/test_api.sh                              # local
-./examples/test_api.sh https://your-app.azurewebsites.net  # Azure
+./examples/test_api.sh https://rag-prototype-7be4dfe5.azurewebsites.net  # Azure
 ```
 
-**Manual curl:**
+See [examples/README.md](examples/README.md) for more options.
+
+## Deploy to Azure App Service
+
+**Important:** Wait 5 minutes after any config change or restart before deploying. Deploying too soon causes "SCM container restart" and kills the build.
+
 ```bash
-curl -X POST http://localhost:8000/ingest -F "files=@data/sample_contract.txt"
-curl -X POST http://localhost:8000/extract -H "Content-Type: application/json" -d '{}'
-curl -X POST http://localhost:8000/qa -H "Content-Type: application/json" -d '{"question": "What is the contract value?"}'
+cd ~/rag-prototype
+az webapp up --resource-group rg-rag-west --name rag-prototype-7be4dfe5 --runtime "PYTHON:3.11"
 ```
 
-See [examples/README.md](examples/README.md) for full test options.
+Or use `./scripts/deploy-azure.sh`. Ensure `SCM_DO_BUILD_DURING_DEPLOYMENT=true` in app settings so Oryx installs packages.
 
 ## Deploy to Streamlit Community Cloud
+
+**Live app:** [https://rag-prototype-ezwo58dutziwjacwqxyhqn.streamlit.app](https://rag-prototype-ezwo58dutziwjacwqxyhqn.streamlit.app)
+
+To deploy your own:
 
 1. Go to [share.streamlit.io](https://share.streamlit.io), sign in with GitHub.
 2. Click **Create app** and fill in:
@@ -159,6 +231,7 @@ Then:
 | [docs/EVALUATION_CHECKLIST.md](docs/EVALUATION_CHECKLIST.md) | Evaluation checklist for the prototype |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Architecture diagrams |
 | [docs/DEMO_RESULTS.md](docs/DEMO_RESULTS.md) | Sample outputs, performance metrics |
+| [docs/USER_GUIDE.md](docs/USER_GUIDE.md) | Setup, API key, and usage guide |
 | [examples/](examples/) | Test scripts (curl, Python) |
 | [data/](data/) | Sample documents |
 

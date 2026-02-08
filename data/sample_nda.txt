@@ -1,0 +1,29 @@
+NON-DISCLOSURE AGREEMENT
+
+Effective Date: March 1, 2025
+Expiration: March 1, 2028
+
+Parties:
+- Disclosing Party: Innovate Labs GmbH, Berlin, Germany
+- Receiving Party: Data Analytics Co., London, UK
+
+Purpose:
+This NDA governs the disclosure of confidential technical specifications and product roadmap information related to Innovate Labs' upcoming AI platform.
+
+Confidential Information:
+- Product designs, source code, and APIs
+- Business plans and pricing strategies
+- Customer lists and contact details
+
+Obligations:
+- Receiving Party shall not disclose Confidential Information to third parties
+- Receiving Party shall use the information only for the evaluation of a potential partnership
+- All materials must be returned or destroyed upon request or termination
+
+Term: Three (3) years from the Effective Date
+
+Governing Law: German law, courts of Berlin
+
+Signed:
+Innovate Labs GmbH
+Data Analytics Co.
