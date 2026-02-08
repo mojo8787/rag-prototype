@@ -18,6 +18,7 @@ try:
 except Exception:
     pass
 
+from src.agents import run_extraction_agents
 from src.extraction import DefaultExtractionSchema, run_extraction
 from src.ingest import ingest_documents
 from src.qa import run_qa
@@ -117,10 +118,10 @@ if "llm" not in st.session_state:
 
 
 def get_llm():
-    """Lazy init LLM (OpenAI). Reads OPENAI_API_KEY from env."""
+    """Lazy init LLM (OpenAI or Azure) via llm_factory."""
     if st.session_state["llm"] is None:
-        from langchain_openai import ChatOpenAI
-        st.session_state["llm"] = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+        from src.llm_factory import get_llm as _get_llm
+        st.session_state["llm"] = _get_llm()
     return st.session_state["llm"]
 
 
@@ -292,13 +293,15 @@ def render_qa():
 
 def render_extraction():
     st.markdown("## 📋 Document Extraction")
-    st.markdown("Extract structured fields (dates, parties, amounts, summary) from your documents.")
+    st.markdown("Extract structured fields (dates, parties, amounts, terms, summary) from your documents.")
     st.markdown("")
 
     vs = st.session_state.get("vector_store")
     if vs is None:
         st.warning("📭 No documents loaded. Go to **Ingest** and upload files first.")
         return
+
+    use_agents = st.checkbox("Use multi-agent flow (LangGraph)", value=False, help="Extraction → Validation → Summary agents")
 
     col1, col2, col3 = st.columns([1, 1, 2])
     with col1:
@@ -308,11 +311,19 @@ def render_extraction():
         with st.spinner("Retrieving and extracting..."):
             try:
                 llm = get_llm()
-                result = run_extraction(vs, DefaultExtractionSchema, llm)
+                if use_agents:
+                    result = run_extraction_agents(vs, DefaultExtractionSchema, llm)
+                else:
+                    result = run_extraction(vs, DefaultExtractionSchema, llm)
 
                 # Extracted record
                 st.markdown("### Extracted record")
                 st.json(result["record"])
+
+                # Summary (multi-agent only)
+                if use_agents and result.get("summary"):
+                    st.markdown("### Summary")
+                    st.markdown(result["summary"])
 
                 # Warnings
                 if result.get("uncertain_fields"):

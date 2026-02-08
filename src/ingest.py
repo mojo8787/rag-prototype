@@ -6,9 +6,9 @@ from typing import Any, Callable, List
 
 from langchain_core.documents import Document
 from langchain_community.vectorstores import Chroma
-from langchain_openai import OpenAIEmbeddings
 
 from . import config
+from .llm_factory import get_embeddings
 from .chunking import chunk_document
 
 
@@ -87,7 +87,7 @@ def ingest_documents(
         raise ValueError("No chunks produced from the given documents.")
 
     report("Embedding and storing in vector DB…", 0.85)
-    embeddings = OpenAIEmbeddings(model=embedding_model)
+    embeddings = get_embeddings(model=embedding_model)
     chroma = Chroma.from_documents(
         documents=all_chunks,
         embedding=embeddings,

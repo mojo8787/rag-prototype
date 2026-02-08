@@ -17,16 +17,21 @@ from .retrieval import retrieve
 
 
 class DefaultExtractionSchema(BaseModel):
-    """Preset schema for document extraction: dates, parties, amounts."""
+    """Preset schema for document extraction: dates, parties, amounts, terms."""
 
     dates: str | None = Field(default=None, description="Relevant dates mentioned")
     parties: str | None = Field(default=None, description="People or organizations involved")
     amounts: str | None = Field(default=None, description="Monetary amounts or quantities")
+    terms: str | None = Field(
+        default=None,
+        description="Key contractual terms (obligations, warranties, termination, etc.)",
+    )
     summary: str | None = Field(default=None, description="Brief summary of the document")
 
 EXTRACTION_SYSTEM = """You extract structured data from the provided document chunks. Output valid JSON only.
 For each field you are uncertain about, include an "uncertain_fields" array listing those field names.
-If a field is missing or unclear, use null for its value and add it to "uncertain_fields"."""
+If a field is missing or unclear, use null for its value and add it to "uncertain_fields".
+Include "terms" for key contractual terms such as obligations, warranties, termination, and other important clauses."""
 
 EXTRACTION_USER_TEMPLATE = """Context (chunks from the document):
 
